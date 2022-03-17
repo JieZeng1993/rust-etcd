@@ -1,6 +1,15 @@
 use std::sync::mpsc::{channel, RecvTimeoutError};
 use std::time::Duration;
 
+pub struct RaftNode {
+    pub node_id: i64,
+    pub address: String,
+    //连接信息
+    pub connect: Option<Connect>,
+    pub connect_state: bool,
+}
+
+
 ///跟随者
 pub struct Follower {
     ///节点id
@@ -15,8 +24,8 @@ pub struct Follower {
     pub commit_index: i64,
     ///通用易失性状态，已经倍应用到状态机的最高的日志条目的索引（初始值为0，单调递增）
     pub last_applied: i64,
-    ///节点数量
-    pub node_count: usize,
+    ///所有节点
+    pub nodes: Vec<RaftNode>,
 }
 
 ///候选者
@@ -33,8 +42,8 @@ pub struct Candidate {
     pub commit_index: i64,
     ///通用易失性状态，已经倍应用到状态机的最高的日志条目的索引（初始值为0，单调递增）
     pub last_applied: i64,
-    ///节点数量
-    pub node_count: usize,
+    ///所有节点
+    pub nodes: Vec<RaftNode>,
     ///投票统计
     pub votes: Vec<i64>,
 }
@@ -57,8 +66,8 @@ pub struct Leader {
     pub next_index: Vec<i64>,
     ///领导者易失性状态，对于每一台服务器，已知的已经复制到该服务器的最高日志条目的索引（初始值为0，单调递增）
     pub match_index: Vec<i64>,
-    ///节点数量
-    pub node_count: usize,
+    ///所有节点
+    pub nodes: Vec<RaftNode>,
 }
 
 impl Follower {
@@ -72,13 +81,15 @@ impl Follower {
             logs: self.logs,
             commit_index: self.commit_index,
             last_applied: self.last_applied,
-            node_count: self.node_count,
+            nodes: self.nodes,
             votes: vec![],
         };
 
         //变为候选者自己给自己投票
         candidate.votes.push(candidate.node_id);
 
+        //TODO 向各个节点发送数据
+        for raft_node in &candidate.nodes {}
         //重置选举超时计时器
         loop {
             let (tx, rx) = channel();
