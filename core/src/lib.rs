@@ -1,4 +1,6 @@
 mod state_machine;
+mod election;
+mod test;
 
 #[cfg(test)]
 mod tests {
@@ -8,3 +10,6 @@ mod tests {
         assert_eq!(result, 4);
     }
 }
+
+
+
