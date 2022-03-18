@@ -1,3 +1,4 @@
+use std::net::{TcpListener, TcpStream};
 use std::sync::mpsc::{channel, RecvTimeoutError};
 use std::time::Duration;
 
@@ -5,9 +6,9 @@ pub struct RaftNode {
     pub node_id: i64,
     pub address: String,
     //连接信息
-    pub connect: Option<String>,
-    // pub connect: Option<Connect>,
+    pub connect: Option<TcpStream>,
     pub connect_state: bool,
+    pub tcp_listener: TcpListener,
 }
 
 

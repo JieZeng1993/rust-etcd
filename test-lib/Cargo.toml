@@ -8,4 +8,14 @@ edition = "2021"
 name = "network-client"
 path = "src/network/client.rs"
 
+[[bin]]
+name = "network-server"
+path = "src/network/server.rs"
+
+[[bin]]
+name = "proto-gen"
+path = "src/proto/mod.rs"
+
 [dependencies]
+protobuf-codegen-pure = "2"
+protobuf = "2"
