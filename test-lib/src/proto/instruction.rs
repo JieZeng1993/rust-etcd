@@ -27,7 +27,7 @@
 pub struct Instruction {
     // message fields
     pub a: i32,
-    pub b: ::std::string::String,
+    pub b: i32,
     // special fields
     pub unknown_fields: ::protobuf::UnknownFields,
     pub cached_size: ::protobuf::CachedSize,
@@ -44,7 +44,7 @@ impl Instruction {
         ::std::default::Default::default()
     }
 
-    // int32 a = 2;
+    // int32 a = 1;
 
 
     pub fn get_a(&self) -> i32 {
@@ -59,30 +59,19 @@ impl Instruction {
         self.a = v;
     }
 
-    // string b = 3;
+    // int32 b = 2;
 
 
-    pub fn get_b(&self) -> &str {
-        &self.b
+    pub fn get_b(&self) -> i32 {
+        self.b
     }
     pub fn clear_b(&mut self) {
-        self.b.clear();
+        self.b = 0;
     }
 
     // Param is passed by value, moved
-    pub fn set_b(&mut self, v: ::std::string::String) {
+    pub fn set_b(&mut self, v: i32) {
         self.b = v;
-    }
-
-    // Mutable pointer to the field.
-    // If field is not initialized, it is initialized with default value first.
-    pub fn mut_b(&mut self) -> &mut ::std::string::String {
-        &mut self.b
-    }
-
-    // Take field
-    pub fn take_b(&mut self) -> ::std::string::String {
-        ::std::mem::replace(&mut self.b, ::std::string::String::new())
     }
 }
 
@@ -95,15 +84,19 @@ impl ::protobuf::Message for Instruction {
         while !is.eof()? {
             let (field_number, wire_type) = is.read_tag_unpack()?;
             match field_number {
-                2 => {
+                1 => {
                     if wire_type != ::protobuf::wire_format::WireTypeVarint {
                         return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
                     }
                     let tmp = is.read_int32()?;
                     self.a = tmp;
                 },
-                3 => {
-                    ::protobuf::rt::read_singular_proto3_string_into(wire_type, is, &mut self.b)?;
+                2 => {
+                    if wire_type != ::protobuf::wire_format::WireTypeVarint {
+                        return ::std::result::Result::Err(::protobuf::rt::unexpected_wire_type(wire_type));
+                    }
+                    let tmp = is.read_int32()?;
+                    self.b = tmp;
                 },
                 _ => {
                     ::protobuf::rt::read_unknown_or_skip_group(field_number, wire_type, is, self.mut_unknown_fields())?;
@@ -118,10 +111,10 @@ impl ::protobuf::Message for Instruction {
     fn compute_size(&self) -> u32 {
         let mut my_size = 0;
         if self.a != 0 {
-            my_size += ::protobuf::rt::value_size(2, self.a, ::protobuf::wire_format::WireTypeVarint);
+            my_size += ::protobuf::rt::value_size(1, self.a, ::protobuf::wire_format::WireTypeVarint);
         }
-        if !self.b.is_empty() {
-            my_size += ::protobuf::rt::string_size(3, &self.b);
+        if self.b != 0 {
+            my_size += ::protobuf::rt::value_size(2, self.b, ::protobuf::wire_format::WireTypeVarint);
         }
         my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
         self.cached_size.set(my_size);
@@ -130,10 +123,10 @@ impl ::protobuf::Message for Instruction {
 
     fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
         if self.a != 0 {
-            os.write_int32(2, self.a)?;
+            os.write_int32(1, self.a)?;
         }
-        if !self.b.is_empty() {
-            os.write_string(3, &self.b)?;
+        if self.b != 0 {
+            os.write_int32(2, self.b)?;
         }
         os.write_unknown_fields(self.get_unknown_fields())?;
         ::std::result::Result::Ok(())
@@ -178,7 +171,7 @@ impl ::protobuf::Message for Instruction {
                 |m: &Instruction| { &m.a },
                 |m: &mut Instruction| { &mut m.a },
             ));
-            fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeString>(
+            fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeInt32>(
                 "b",
                 |m: &Instruction| { &m.b },
                 |m: &mut Instruction| { &mut m.b },
@@ -200,7 +193,7 @@ impl ::protobuf::Message for Instruction {
 impl ::protobuf::Clear for Instruction {
     fn clear(&mut self) {
         self.a = 0;
-        self.b.clear();
+        self.b = 0;
         self.unknown_fields.clear();
     }
 }
@@ -219,8 +212,8 @@ impl ::protobuf::reflect::ProtobufValue for Instruction {
 
 static file_descriptor_proto_data: &'static [u8] = b"\
     \n\x1bsrc/proto/instruction.proto\"/\n\x0bInstruction\x12\x0e\n\x01a\x18\
-    \x02\x20\x01(\x05R\x01aB\0\x12\x0e\n\x01b\x18\x03\x20\x01(\tR\x01bB\0:\0\
-    B\0b\x06proto3\
+    \x01\x20\x01(\x05R\x01aB\0\x12\x0e\n\x01b\x18\x02\x20\x01(\x05R\x01bB\0:\
+    \0B\0b\x06proto3\
 ";
 
 static file_descriptor_proto_lazy: ::protobuf::rt::LazyV2<::protobuf::descriptor::FileDescriptorProto> = ::protobuf::rt::LazyV2::INIT;

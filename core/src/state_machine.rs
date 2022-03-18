@@ -1,14 +1,14 @@
 use std::net::{TcpListener, TcpStream};
 use std::sync::mpsc::{channel, RecvTimeoutError};
 use std::time::Duration;
+use crate::connection::Connection;
 
 pub struct RaftNode {
     pub node_id: i64,
     pub address: String,
     //连接信息
-    pub connect: Option<TcpStream>,
+    pub connect: Option<Connection>,
     pub connect_state: bool,
-    pub tcp_listener: TcpListener,
 }
 
 
@@ -28,6 +28,7 @@ pub struct Follower {
     pub last_applied: i64,
     ///所有节点
     pub nodes: Vec<RaftNode>,
+    pub tcp_listener: TcpListener,
 }
 
 ///候选者
@@ -48,6 +49,7 @@ pub struct Candidate {
     pub nodes: Vec<RaftNode>,
     ///投票统计
     pub votes: Vec<i64>,
+    pub tcp_listener: TcpListener,
 }
 
 ///领导者
@@ -70,6 +72,7 @@ pub struct Leader {
     pub match_index: Vec<i64>,
     ///所有节点
     pub nodes: Vec<RaftNode>,
+    pub tcp_listener: TcpListener,
 }
 
 impl Follower {

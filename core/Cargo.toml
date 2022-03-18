@@ -8,3 +8,5 @@ edition = "2021"
 [dependencies]
 #timer = "*"
 #chrono = { version = "*" }
+tokio = { version = "1", features = ["io-util","rt-multi-thread"] }
+bytes = "*"

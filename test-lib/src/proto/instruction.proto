@@ -2,6 +2,7 @@ syntax = "proto3";
 
 message Instruction{
 
-  int32 a = 2;
-  string  b = 3;
+  int32 a = 1;
+  int32 b = 2;
+//  string  b = 3;
 }
