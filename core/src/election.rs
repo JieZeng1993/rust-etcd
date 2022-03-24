@@ -53,10 +53,11 @@ async fn server() -> Follower {
 
     let follower_arc = Arc::clone(&follower.nodes);
     tokio::spawn(async move {
-        for raft_node in follower_arc.lock().unwrap().iter_mut() {
+        let mut follower_arc =  follower_arc.lock().unwrap().iter_mut();
+        for raft_node in follower_arc {
             if raft_node.connect.is_some() {
                 //如果没有连接
-                return;
+                continue;
             }
 
             //没有连接，建立连接

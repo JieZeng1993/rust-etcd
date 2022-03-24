@@ -1,7 +1,9 @@
 use std::sync::{Arc, Mutex};
-use tokio::net::{TcpListener, TcpStream};
 use std::sync::mpsc::{channel, RecvTimeoutError};
 use std::time::Duration;
+
+use tokio::net::{TcpListener, TcpStream};
+
 use crate::connection::Connection;
 
 pub struct RaftNode {
@@ -47,7 +49,7 @@ pub struct Candidate {
     ///通用易失性状态，已经倍应用到状态机的最高的日志条目的索引（初始值为0，单调递增）
     pub last_applied: i64,
     ///所有节点
-    pub nodes: Arc<Vec<RaftNode>>,
+    pub nodes: Arc<Mutex<Vec<RaftNode>>>,
     ///投票统计
     pub votes: Vec<i64>,
     pub tcp_listener: TcpListener,
@@ -89,14 +91,14 @@ impl Follower {
             last_applied: self.last_applied,
             nodes: self.nodes,
             votes: vec![],
-            tcp_listener: self.tcp_listener
+            tcp_listener: self.tcp_listener,
         };
 
         //变为候选者自己给自己投票
         candidate.votes.push(candidate.node_id);
 
         //TODO 向各个节点发送数据
-        for raft_node in &candidate.nodes {}
+        for raft_node in candidate.nodes.lock().unwrap().iter_mut() {}
         //重置选举超时计时器
         loop {
             let (tx, rx) = channel();
