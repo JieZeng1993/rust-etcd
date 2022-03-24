@@ -1,6 +1,6 @@
 use std::fmt::Error;
 use std::io::Cursor;
-use std::net::TcpStream;
+use tokio::net::TcpStream;
 
 use bytes::{Buf, BytesMut};
 use tokio::io::{AsyncReadExt, BufWriter};
@@ -18,11 +18,25 @@ pub struct Connection {
 
 impl Connection {
     pub async fn read_frame(&mut self) -> Result<Option<String>, Error> {
-        let mut buf = Cursor::new(&self.buffer[..]);
-        if 0 == self.stream.read_buf(&mut self.buffer).await?{
-            if self.stream.
+        loop {
+            let mut buf = Cursor::new(&self.buffer[..]);
+            if buf.position() > 2 {
+                //0到3 index 是4个字节
+                let len = buf.get_u32();
+                if buf.remaining() >= len as usize {
+                    //do parse
+                    // let data = self.buffer[4..(len - 1)];
+                    self.buffer.advance((len + 4) as usize);
+                }
+            }
+
+            // if 0 == self.stream.read_buf(&mut self.buffer).await? {
+            //     return if self.buffer.is_empty() {
+            //         Ok(None)
+            //     } else {
+            //         Err("connection reset by peer".into())
+            //     };
+            // }
         }
-        let len = buf.get_u32();
-        Ok(None)
     }
 }

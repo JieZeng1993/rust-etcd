@@ -8,5 +8,8 @@ edition = "2021"
 [dependencies]
 #timer = "*"
 #chrono = { version = "*" }
-tokio = { version = "1", features = ["io-util","rt-multi-thread"] }
+tokio = { version = "1", features = ["io-util", "rt-multi-thread", "net"] }
 bytes = "*"
+
+protobuf-codegen-pure = "2"
+protobuf = "2"

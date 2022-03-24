@@ -1,4 +1,5 @@
-use std::net::{TcpListener, TcpStream};
+use std::sync::{Arc, Mutex};
+use tokio::net::{TcpListener, TcpStream};
 use std::sync::mpsc::{channel, RecvTimeoutError};
 use std::time::Duration;
 use crate::connection::Connection;
@@ -27,7 +28,7 @@ pub struct Follower {
     ///通用易失性状态，已经倍应用到状态机的最高的日志条目的索引（初始值为0，单调递增）
     pub last_applied: i64,
     ///所有节点
-    pub nodes: Vec<RaftNode>,
+    pub nodes: Arc<Mutex<Vec<RaftNode>>>,
     pub tcp_listener: TcpListener,
 }
 
@@ -46,7 +47,7 @@ pub struct Candidate {
     ///通用易失性状态，已经倍应用到状态机的最高的日志条目的索引（初始值为0，单调递增）
     pub last_applied: i64,
     ///所有节点
-    pub nodes: Vec<RaftNode>,
+    pub nodes: Arc<Vec<RaftNode>>,
     ///投票统计
     pub votes: Vec<i64>,
     pub tcp_listener: TcpListener,
@@ -88,6 +89,7 @@ impl Follower {
             last_applied: self.last_applied,
             nodes: self.nodes,
             votes: vec![],
+            tcp_listener: self.tcp_listener
         };
 
         //变为候选者自己给自己投票

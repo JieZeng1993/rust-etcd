@@ -1,13 +1,15 @@
-use std::net::{TcpListener, TcpStream};
+use std::sync::{Arc, Mutex};
+
 use bytes::BytesMut;
 use tokio::io::BufWriter;
-use crate::connection::Connection;
+use tokio::net::{TcpListener, TcpStream};
 
+use crate::connection::Connection;
 use crate::state_machine::{Follower, RaftNode};
 
 ///从leader变为candidate
 
-fn server() {
+async fn server() -> Follower {
     //很多属性都是写死的，后续完善
     let mut all_nodes = vec![
         RaftNode {
@@ -35,26 +37,30 @@ fn server() {
         raft_node.node_id == 1
     }).expect("未找到当前节点的node id");
 
-    let follower = Follower {
-        node_id: current_raft_node.node_id,
+    let node_id = current_raft_node.node_id;
+    let address = current_raft_node.address.clone();
+
+    let mut follower = Follower {
+        node_id,
         current_term: 0,
         voted_for: None,
         logs: vec![],
         commit_index: 0,
         last_applied: 0,
-        nodes: all_nodes,
-        tcp_listener: TcpListener::bind(current_raft_node.address.clone()).await.unwrap(),
+        nodes: Arc::new(Mutex::new(all_nodes)),
+        tcp_listener: TcpListener::bind(address).await.unwrap(),
     };
 
-    for raft_node in all_nodes.iter_mut() {
-        tokio::spawn(async move {
+    let follower_arc = Arc::clone(&follower.nodes);
+    tokio::spawn(async move {
+        for raft_node in follower_arc.lock().unwrap().iter_mut() {
             if raft_node.connect.is_some() {
                 //如果没有连接
                 return;
             }
 
             //没有连接，建立连接
-            match TcpStream::connect(raft_node.address.clone()) {
+            match TcpStream::connect(raft_node.address.clone()).await {
                 Ok(tcp_stream) => {
                     raft_node.connect = Option::from(Connection {
                         stream: BufWriter::new(tcp_stream),
@@ -62,16 +68,16 @@ fn server() {
                         buffer: BytesMut::with_capacity(4 * 1024),
                     });
 
-                    loop {
-
-                    }
+                    loop {}
                 }
                 Err(_) => {}
             }
-        });
-    }
+        }
+    });
+
 
     //TODO 发现是否有leader
     //成为候选者
-    let candidate = follower.to_candidate();
+    // let candidate = follower.to_candidate();
+    follower
 }

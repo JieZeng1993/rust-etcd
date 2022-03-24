@@ -2,6 +2,7 @@ mod state_machine;
 mod election;
 mod test;
 mod connection;
+mod proto;
 
 #[cfg(test)]
 mod tests {
