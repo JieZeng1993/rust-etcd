@@ -51,35 +51,34 @@ async fn server() -> Follower {
         tcp_listener: TcpListener::bind(address).await.unwrap(),
     };
 
-    let follower_arc = follower.nodes.clone();
-
-    // let mut follower_arc_mutex = follower_arc.lock().unwrap();
-    // let mut follower_arc_iter = follower_arc_mutex.iter_mut();
-    // let follower_arc_iter = follower_arc.lock().unwrap().iter_mut();
-    for raft_node in follower_arc.lock().unwrap().iter_mut() {
-        // let raft_node = Arc::new(raft_node);
-        tokio::spawn(async move {
-            if raft_node.connect.is_some() {
-                //如果有连接
-                return;
-            }
-
-            //没有连接，建立连接
-            match TcpStream::connect(raft_node.address.clone()).await {
-                Ok(tcp_stream) => {
-                    raft_node.connect = Option::from(Connection {
-                        stream: BufWriter::new(tcp_stream),
-                        //包大小
-                        buffer: BytesMut::with_capacity(4 * 1024),
-                    });
-
-                    loop {}
+    let follower_arc = Arc::clone(&follower.nodes);
+    tokio::spawn(async move {
+        // let mut follower_arc_mutex = follower_arc.lock().unwrap();
+        // let mut follower_arc_iter = follower_arc_mutex.iter_mut();
+        let follower_arc_iter = follower_arc.lock().unwrap().iter_mut();
+        for raft_node in follower_arc_iter {
+            tokio::spawn(async move {
+                if raft_node.connect.is_some() {
+                    //如果有连接
+                    return;
                 }
-                Err(_) => {}
-            }
-        });
-    }
 
+                //没有连接，建立连接
+                match TcpStream::connect(raft_node.address.clone()).await {
+                    Ok(tcp_stream) => {
+                        raft_node.connect = Option::from(Connection {
+                            stream: BufWriter::new(tcp_stream),
+                            //包大小
+                            buffer: BytesMut::with_capacity(4 * 1024),
+                        });
+
+                        loop {}
+                    }
+                    Err(_) => {}
+                }
+            });
+        }
+    });
 
     //TODO 发现是否有leader
     //成为候选者
